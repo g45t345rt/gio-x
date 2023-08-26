@@ -7,27 +7,45 @@ import (
 )
 
 var (
-	view   uintptr
-	result chan ImageResult
+	view       uintptr
+	feedResult chan FeedResult
 )
 
-type ImageResult struct {
+type FeedResult struct {
 	Image image.Image
 	Err   error
 }
+
+const (
+	LensFacingFront    = "FRONT"
+	LensFacingBack     = "BACK"
+	LensFacingExternal = "EXTERNAL"
+)
 
 func ListenEvents(evt event.Event) {
 	listenEvents(evt)
 }
 
-func Open() error {
-	return openCamera()
+func GetSensorOrientation(cameraId string) (int, error) {
+	return getCameraSensorOrientation(cameraId)
 }
 
-func Close() error {
-	return closeCamera()
+func GetLensFacing(cameraId string) (string, error) {
+	return getCameraLensFacing(cameraId)
 }
 
-func GetImage() chan ImageResult {
-	return result
+func GetIdList() ([]string, error) {
+	return getCameraIdList()
+}
+
+func OpenFeed(cameraId string, width int, height int) error {
+	return openCameraFeed(cameraId, width, height)
+}
+
+func CloseFeed() error {
+	return closeCameraFeed()
+}
+
+func GetFeed() chan FeedResult {
+	return feedResult
 }

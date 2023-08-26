@@ -15,10 +15,22 @@ var (
 
 func listenEvents(_ event.Event) {}
 
-func openCamera() error {
+func getCameraSensorOrientation(cameraId string) (int, error) {
+	return 0, ErrNotAvailable
+}
+
+func getCameraLensFacing(cameraId string) (string, error) {
+	return "", ErrNotAvailable
+}
+
+func getCameraIdList() ([]string, error) {
+	return nil, ErrNotAvailable
+}
+
+func openCameraFeed(cameraId string, width int, height int) error {
 	return ErrNotAvailable
 }
 
-func closeCamera() error {
+func closeCameraFeed() error {
 	return ErrNotAvailable
 }
