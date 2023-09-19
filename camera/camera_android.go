@@ -148,6 +148,7 @@ func closeCameraFeed() error {
 			return err
 		}
 
+		close(feedResult)
 		return nil
 	})
 

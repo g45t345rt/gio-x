@@ -60,8 +60,7 @@ public class camera_android {
           closeCameraFeed();
         }
       }, handler);
-    } catch (CameraAccessException e) {
-      return;
+    } catch (CameraAccessException ignored) {
     }
   }
 
@@ -103,20 +102,15 @@ public class camera_android {
     imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
       @Override
       public void onImageAvailable(ImageReader reader) {
-        Image image = reader.acquireLatestImage();
-
-        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-        byte[] imageData = new byte[buffer.remaining()];
-        buffer.get(imageData);
-
         try {
+          Image image = reader.acquireLatestImage();
+          ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+          byte[] imageData = new byte[buffer.remaining()];
+          buffer.get(imageData);
+          image.close();
           FeedCallback(imageData, null);
         } catch (Exception e) {
           FeedCallback(null, e.toString());
-        }
-
-        if (image != null) {
-          image.close();
         }
       }
     }, backgroundHandler);
@@ -134,7 +128,7 @@ public class camera_android {
           try {
             CaptureRequest previewRequest = captureRequestBuilder.build();
             cameraCaptureSession.setRepeatingRequest(previewRequest, null, backgroundHandler);
-          } catch (CameraAccessException e) {
+          } catch (Exception e) {
             closeCameraFeed();
           }
         }
@@ -144,7 +138,7 @@ public class camera_android {
           closeCameraFeed();
         }
       }, null);
-    } catch (CameraAccessException e) {
+    } catch (Exception e) {
       closeCameraFeed();
     }
   }
@@ -160,18 +154,21 @@ public class camera_android {
       backgroundThread.quitSafely();
       try {
         backgroundThread.join();
-        backgroundThread = null;
-        backgroundHandler = null;
-      } catch (InterruptedException e) {
+      } catch (InterruptedException ignored) {
 
       }
+
+      backgroundThread = null;
+      backgroundHandler = null;
     }
   }
 
   public static void closeCameraFeed() {
-    if (cameraDevice != null) {
-      cameraDevice.close();
-      cameraDevice = null;
+    stopBackgroundThread();
+
+    if (imageReader != null) {
+      imageReader.close();
+      imageReader = null;
     }
 
     if (cameraCaptureSession != null) {
@@ -179,12 +176,10 @@ public class camera_android {
       cameraCaptureSession = null;
     }
 
-    if (imageReader != null) {
-      imageReader.close();
-      imageReader = null;
+    if (cameraDevice != null) {
+      cameraDevice.close();
+      cameraDevice = null;
     }
-
-    stopBackgroundThread();
   }
 
   private static boolean askPermission(View view) {
